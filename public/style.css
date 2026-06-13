@@ -287,8 +287,36 @@ body {
     background: #000;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 0 40px;
     z-index: 100000;
+    border-bottom: 1px solid #333;
+}
+
+.server-selector {
+    display: flex;
+    gap: 10px;
+}
+
+.server-btn {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.server-btn:hover {
+    background: #444;
+}
+
+.server-btn.active {
+    background: var(--netflix-red);
+    color: white;
 }
 
 .player-page .back-btn {

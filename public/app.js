@@ -25,13 +25,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'auto'; // Kembalikan scroll beranda
     });
 
-    function playVideo(mediaType, id) {
+    let currentPlayerMediaType = '';
+    let currentPlayerId = '';
+
+    window.changeServer = function(btn, serverName) {
+        document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        
         let iframeUrl = '';
-        if (mediaType === 'tv') {
-            // Ganti vidsrc.net ke vidsrc.me atau vidsrc.cc karena .net sepertinya mati/diblokir DNS
-            iframeUrl = `https://vidsrc.me/embed/tv?tmdb=${id}`;
+        const id = currentPlayerId;
+        
+        if (currentPlayerMediaType === 'tv') {
+            if (serverName === 'vidsrc.me') iframeUrl = `https://vidsrc.me/embed/tv?tmdb=${id}`;
+            else if (serverName === 'vidsrc.pro') iframeUrl = `https://vidsrc.pro/embed/tv/${id}`;
+            else if (serverName === 'vidsrc.cc') iframeUrl = `https://vidsrc.cc/v2/embed/tv/${id}`;
+            else if (serverName === 'superembed') iframeUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
         } else {
-            iframeUrl = `https://vidlink.pro/movie/${id}?primaryColor=e50914&autoplay=1`;
+            if (serverName === 'vidlink') iframeUrl = `https://vidlink.pro/movie/${id}?primaryColor=e50914&autoplay=1`;
+            else if (serverName === 'vidsrc.me') iframeUrl = `https://vidsrc.me/embed/movie?tmdb=${id}`;
+            else if (serverName === 'vidsrc.pro') iframeUrl = `https://vidsrc.pro/embed/movie/${id}`;
+            else if (serverName === 'superembed') iframeUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
         }
         
         iframeContainer.innerHTML = `
@@ -40,8 +53,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 allowfullscreen 
             ></iframe>
         `;
+    };
+
+    function playVideo(mediaType, id) {
+        currentPlayerMediaType = mediaType;
+        currentPlayerId = id;
+        
+        const serverSelector = document.getElementById('server-selector');
+        
+        if (mediaType === 'tv') {
+            serverSelector.innerHTML = `
+                <button class="server-btn active" onclick="changeServer(this, 'vidsrc.me')">Server 1 (VidSrc)</button>
+                <button class="server-btn" onclick="changeServer(this, 'vidsrc.pro')">Server 2 (Pro)</button>
+                <button class="server-btn" onclick="changeServer(this, 'vidsrc.cc')">Server 3 (CC)</button>
+                <button class="server-btn" onclick="changeServer(this, 'superembed')">Server 4 (Super)</button>
+            `;
+            changeServer(null, 'vidsrc.me');
+        } else {
+            serverSelector.innerHTML = `
+                <button class="server-btn active" onclick="changeServer(this, 'vidlink')">Server 1 (VidLink HD)</button>
+                <button class="server-btn" onclick="changeServer(this, 'vidsrc.me')">Server 2 (VidSrc)</button>
+                <button class="server-btn" onclick="changeServer(this, 'vidsrc.pro')">Server 3 (Pro)</button>
+                <button class="server-btn" onclick="changeServer(this, 'superembed')">Server 4 (Super)</button>
+            `;
+            changeServer(null, 'vidlink');
+        }
+
         playerPage.classList.add('active');
         document.body.style.overflow = 'hidden'; 
+        
+        // Tandai tombol pertama sebagai aktif
+        const firstBtn = serverSelector.querySelector('.server-btn');
+        if (firstBtn) firstBtn.classList.add('active');
     }
 
     function optimizeImage(url) {
