@@ -26,15 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function playVideo(mediaType, id) {
-        // Menggunakan atribut sandbox untuk memblokir pop-up iklan dan tab baru!
-        // Vidlink.pro biasanya lebih bersih dari iklan pop-under yang ganas.
+        // Karena server gratisan mendeteksi sandbox dan menolak diputar (Please Disable Sandbox),
+        // kita terpaksa melepas atribut sandbox. Untuk mengatasi iklan pop-up,
+        // pengguna disarankan menggunakan ad-blocker di browser (misal uBlock Origin).
         const iframeUrl = `https://vidlink.pro/${mediaType}/${id}?primaryColor=e50914&autoplay=1`;
         
         iframeContainer.innerHTML = `
             <iframe 
                 src="${iframeUrl}" 
                 allowfullscreen 
-                sandbox="allow-same-origin allow-scripts"
             ></iframe>
         `;
         playerPage.classList.add('active');
