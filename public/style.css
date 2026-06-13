@@ -186,7 +186,7 @@ body {
 
 /* Slider Section */
 .slider-section {
-    padding: 0 4%;
+    padding: 0; /* Reset padding to full width for bleeding */
     margin-top: -60px;
     position: relative;
     z-index: 3;
@@ -195,23 +195,18 @@ body {
 .slider-title {
     font-size: 1.4vw;
     font-weight: 600;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    padding-left: 4%;
 }
 
 .slider-container {
     display: flex;
     gap: 10px;
-    overflow-x: auto;
-    overflow-y: visible;
-    padding: 60px 4% 60px 4%; /* Ditambah menjadi 60px agar tidak kepotong saat hover */
-    margin-top: -40px; /* Kompensasi padding berlebih */
-    scroll-behavior: smooth;
-    position: relative;
-}
-
-.slider-container::-webkit-scrollbar {
-    display: none;
+    padding: 40px 4%; /* Memberi ruang agar hover membesar tidak terpotong (overflow) */
+    overflow: visible; /* Tidak memotong apapun! */
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
 }
 
 /* Arrow Buttons */
@@ -222,8 +217,8 @@ body {
 
 .slider-arrow {
     position: absolute;
-    top: 20px; /* Disesuaikan dengan padding container */
-    bottom: 20px;
+    top: 40px; 
+    bottom: 40px;
     width: 4%;
     background: rgba(0,0,0,0.5);
     color: white;
@@ -232,7 +227,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 10;
+    z-index: 100;
     opacity: 0;
     transition: all 0.2s ease;
 }
@@ -258,53 +253,60 @@ body {
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
     position: relative;
     overflow: visible;
+    flex-shrink: 0; /* Mencegah kartu mengecil saat fleksibel */
 }
 
-/* Video Modal Styles */
-.video-modal {
+/* Player Page Styles */
+.player-page {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 9999;
+    background: #000;
+    z-index: 99999;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease;
 }
 
-.video-modal.active {
+.player-page.active {
     opacity: 1;
     pointer-events: auto;
 }
 
-.video-modal .close-btn {
+.player-page .back-btn {
     position: absolute;
-    top: 20px;
-    right: 30px;
+    top: 30px;
+    left: 40px;
     color: white;
-    font-size: 40px;
+    font-size: 1.2rem;
+    font-weight: 600;
     cursor: pointer;
-    z-index: 10000;
-    transition: transform 0.2s;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s, color 0.2s;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
 
-.video-modal .close-btn:hover {
-    transform: scale(1.2);
+.player-page .back-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.player-page .back-btn:hover {
+    transform: translateX(-5px);
     color: var(--netflix-red);
 }
 
-.video-modal iframe {
-    width: 90%;
-    height: 80%;
+.player-page iframe {
+    width: 100%;
+    height: 100%;
     border: none;
-    border-radius: 8px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.8);
     background: #000;
 }
 

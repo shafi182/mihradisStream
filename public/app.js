@@ -14,30 +14,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const videoModal = document.getElementById('video-modal');
-    const closeVideo = document.getElementById('close-video');
+    const playerPage = document.getElementById('player-page');
+    const closePlayer = document.getElementById('close-player');
     const iframeContainer = document.getElementById('iframe-container');
 
-    // Menutup modal video
-    closeVideo.addEventListener('click', () => {
-        videoModal.classList.remove('active');
-        iframeContainer.innerHTML = ''; // Hentikan video saat ditutup
-    });
-
-    // Menutup modal jika area gelap diklik
-    videoModal.addEventListener('click', (e) => {
-        if (e.target === videoModal) {
-            videoModal.classList.remove('active');
-            iframeContainer.innerHTML = '';
-        }
+    // Menutup player page
+    closePlayer.addEventListener('click', () => {
+        playerPage.classList.remove('active');
+        iframeContainer.innerHTML = ''; // Hentikan video
+        document.body.style.overflow = 'auto'; // Kembalikan scroll beranda
     });
 
     function playVideo(mediaType, id) {
-        // vidsrc.me format: https://vidsrc.me/embed/movie?tmdb={id} atau https://vidsrc.me/embed/tv?tmdb={id}
-        // Bisa juga vidlink.pro/movie/{id}
-        const iframeUrl = `https://vidsrc.me/embed/${mediaType}?tmdb=${id}`;
-        iframeContainer.innerHTML = `<iframe src="${iframeUrl}" allowfullscreen></iframe>`;
-        videoModal.classList.add('active');
+        // Menggunakan atribut sandbox untuk memblokir pop-up iklan dan tab baru!
+        // Vidlink.pro biasanya lebih bersih dari iklan pop-under yang ganas.
+        const iframeUrl = `https://vidlink.pro/${mediaType}/${id}?primaryColor=e50914&autoplay=1`;
+        
+        iframeContainer.innerHTML = `
+            <iframe 
+                src="${iframeUrl}" 
+                allowfullscreen 
+                sandbox="allow-same-origin allow-scripts"
+            ></iframe>
+        `;
+        playerPage.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Kunci scroll beranda
     }
 
     async function fetchMovies() {
@@ -76,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             heroSection.style.backgroundImage = `url('${heroMovie.background}')`;
 
-            // Tombol play di hero section
             const heroPlayBtn = document.querySelector('.btn-play');
             if (heroPlayBtn) {
                 heroPlayBtn.onclick = () => playVideo(heroMovie.mediaType, heroMovie.id);
@@ -107,11 +107,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.createElement('div');
             container.className = 'slider-container';
 
+            // Logika Geser Javascript (Transform TranslateX)
+            let currentTranslate = 0;
+            const cardWidth = 260; // 250px + 10px gap
+
             leftArrow.addEventListener('click', () => {
-                container.scrollBy({ left: -window.innerWidth * 0.7, behavior: 'smooth' });
+                currentTranslate += cardWidth * 3;
+                if (currentTranslate > 0) currentTranslate = 0;
+                container.style.transform = `translateX(${currentTranslate}px)`;
             });
+
             rightArrow.addEventListener('click', () => {
-                container.scrollBy({ left: window.innerWidth * 0.7, behavior: 'smooth' });
+                const maxTranslate = -((category.movies.length - 2) * cardWidth);
+                currentTranslate -= cardWidth * 3;
+                if (currentTranslate < maxTranslate) currentTranslate = maxTranslate;
+                container.style.transform = `translateX(${currentTranslate}px)`;
             });
 
             category.movies.forEach(movie => {
