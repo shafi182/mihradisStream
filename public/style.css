@@ -188,7 +188,13 @@ body {
 .slider-section {
     padding: 0; 
     margin-top: -60px;
-    margin-bottom: 20px;
+    margin-bottom: 40px; /* Jarak antar row diperbesar */
+    transition: z-index 0.3s;
+}
+
+.slider-section:hover {
+    position: relative;
+    z-index: 50; /* Angkat baris yang sedang disorot ke lapisan teratas! */
 }
 
 .slider-title {

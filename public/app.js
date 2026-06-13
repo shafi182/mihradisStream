@@ -26,10 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function playVideo(mediaType, id) {
-        // Karena server gratisan mendeteksi sandbox dan menolak diputar (Please Disable Sandbox),
-        // kita terpaksa melepas atribut sandbox. Untuk mengatasi iklan pop-up,
-        // pengguna disarankan menggunakan ad-blocker di browser (misal uBlock Origin).
-        const iframeUrl = `https://vidlink.pro/${mediaType}/${id}?primaryColor=e50914&autoplay=1`;
+        let iframeUrl = '';
+        if (mediaType === 'tv') {
+            // Vidlink butuh parameter season & episode untuk TV Show.
+            // Karena kita tidak punya data itu, kita pakai vidsrc.net yang punya UI pemilih episode bawaan!
+            iframeUrl = `https://vidsrc.net/embed/tv?tmdb=${id}`;
+        } else {
+            // Untuk Film (Movie), vidlink.pro jauh lebih bersih.
+            iframeUrl = `https://vidlink.pro/movie/${id}?primaryColor=e50914&autoplay=1`;
+        }
         
         iframeContainer.innerHTML = `
             <iframe 
@@ -134,10 +139,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let yearHTML = movie.release_date ? `<span class="year">${movie.release_date.substring(0,4)}</span>` : '';
                 let ratingHTML = movie.rating ? `<span>⭐ ${movie.rating}</span>` : '';
+                
+                // Gunakan background (16:9) jika ada, jika tidak, gunakan poster
+                const thumbnail = movie.background || movie.poster;
 
                 card.innerHTML = `
                     <div class="card-image-wrapper">
-                        <img src="${movie.poster}" loading="lazy" alt="${movie.title}">
+                        <img src="${thumbnail}" loading="lazy" alt="${movie.title}">
                     </div>
                     <div class="card-info">
                         <div class="card-title">${movie.title}</div>
