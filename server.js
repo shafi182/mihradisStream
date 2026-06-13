@@ -83,8 +83,10 @@ app.get('/api/trending', async (req, res) => {
                 if (m.title && m.slug && m.poster) {
                     // Hindari duplikasi dalam 1 kategori
                     if (!cleanedMovies.some(existing => existing.title === m.title)) {
+                        const mType = m.mediaType || (m.slug ? m.slug.split('/')[1] : 'movie');
                         cleanedMovies.push({
                             id: m.id,
+                            mediaType: mType,
                             title: m.title.replace(/Top\d+/, '').split('·')[0].trim(),
                             link: `https://cineby.at${m.slug}`,
                             poster: m.poster,

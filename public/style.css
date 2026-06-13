@@ -204,7 +204,8 @@ body {
     gap: 10px;
     overflow-x: auto;
     overflow-y: visible;
-    padding: 20px 4% 40px 4%;
+    padding: 60px 4% 60px 4%; /* Ditambah menjadi 60px agar tidak kepotong saat hover */
+    margin-top: -40px; /* Kompensasi padding berlebih */
     scroll-behavior: smooth;
     position: relative;
 }
@@ -221,8 +222,8 @@ body {
 
 .slider-arrow {
     position: absolute;
-    top: 0;
-    bottom: 40px; /* offset bottom padding */
+    top: 20px; /* Disesuaikan dengan padding container */
+    bottom: 20px;
     width: 4%;
     background: rgba(0,0,0,0.5);
     color: white;
@@ -256,7 +257,55 @@ body {
     cursor: pointer;
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
     position: relative;
-    overflow: visible; /* Penting untuk hover card yang melebar keluar */
+    overflow: visible;
+}
+
+/* Video Modal Styles */
+.video-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.video-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.video-modal .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 10000;
+    transition: transform 0.2s;
+}
+
+.video-modal .close-btn:hover {
+    transform: scale(1.2);
+    color: var(--netflix-red);
+}
+
+.video-modal iframe {
+    width: 90%;
+    height: 80%;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    background: #000;
 }
 
 .card-image-wrapper {

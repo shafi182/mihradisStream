@@ -14,6 +14,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const videoModal = document.getElementById('video-modal');
+    const closeVideo = document.getElementById('close-video');
+    const iframeContainer = document.getElementById('iframe-container');
+
+    // Menutup modal video
+    closeVideo.addEventListener('click', () => {
+        videoModal.classList.remove('active');
+        iframeContainer.innerHTML = ''; // Hentikan video saat ditutup
+    });
+
+    // Menutup modal jika area gelap diklik
+    videoModal.addEventListener('click', (e) => {
+        if (e.target === videoModal) {
+            videoModal.classList.remove('active');
+            iframeContainer.innerHTML = '';
+        }
+    });
+
+    function playVideo(mediaType, id) {
+        // vidsrc.me format: https://vidsrc.me/embed/movie?tmdb={id} atau https://vidsrc.me/embed/tv?tmdb={id}
+        // Bisa juga vidlink.pro/movie/{id}
+        const iframeUrl = `https://vidsrc.me/embed/${mediaType}?tmdb=${id}`;
+        iframeContainer.innerHTML = `<iframe src="${iframeUrl}" allowfullscreen></iframe>`;
+        videoModal.classList.add('active');
+    }
+
     async function fetchMovies() {
         try {
             const response = await fetch('/api/trending');
@@ -33,8 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderCategories(categories) {
         categoriesContainer.innerHTML = ''; 
 
-        // Setel Hero Background dengan film pertama yang memiliki gambar background
-        // Cari semua film yang punya background
         let allMoviesWithBg = [];
         categories.forEach(cat => {
             cat.movies.forEach(m => {
@@ -43,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (allMoviesWithBg.length > 0) {
-            // Pilih acak dari top 10
             const heroMovie = allMoviesWithBg[Math.floor(Math.random() * Math.min(10, allMoviesWithBg.length))];
             
             heroTitle.textContent = heroMovie.title;
@@ -52,9 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             heroSection.style.backgroundImage = `url('${heroMovie.background}')`;
+
+            // Tombol play di hero section
+            const heroPlayBtn = document.querySelector('.btn-play');
+            if (heroPlayBtn) {
+                heroPlayBtn.onclick = () => playVideo(heroMovie.mediaType, heroMovie.id);
+            }
         }
 
-        // Render Setiap Kategori
         categories.forEach(category => {
             if (category.movies.length === 0) return;
 
@@ -79,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.createElement('div');
             container.className = 'slider-container';
 
-            // Fitur geser
             leftArrow.addEventListener('click', () => {
                 container.scrollBy({ left: -window.innerWidth * 0.7, behavior: 'smooth' });
             });
@@ -87,13 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.scrollBy({ left: window.innerWidth * 0.7, behavior: 'smooth' });
             });
 
-            // Render Kartu Film
             category.movies.forEach(movie => {
                 const card = document.createElement('div');
                 card.className = 'movie-card';
                 
                 card.addEventListener('click', () => {
-                    window.open(movie.link, '_blank');
+                    playVideo(movie.mediaType, movie.id);
                 });
 
                 let yearHTML = movie.release_date ? `<span class="year">${movie.release_date.substring(0,4)}</span>` : '';
