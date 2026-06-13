@@ -1,0 +1,16 @@
+{
+  "name": "video-scraper-service",
+  "version": "1.0.0",
+  "description": "Backend service to extract m3u8 streams using Playwright stealth",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "playwright": "^1.44.1"
+  }
+}

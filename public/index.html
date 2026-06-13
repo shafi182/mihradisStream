@@ -7,54 +7,50 @@
     <meta name="description" content="Streaming platform with Netflix-like UI consuming Cineby Scraper API.">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- HLS.js untuk memutar format m3u8 secara murni tanpa iframe -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
     <!-- Navbar -->
-    <header class="navbar">
-        <div class="logo">CINEBY</div>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="#" class="active">Home</a></li>
-                <li><a href="#">TV Shows</a></li>
-                <li><a href="#">Movies</a></li>
-                <li><a href="#">New & Popular</a></li>
-                <li><a href="#">My List</a></li>
-            </ul>
-        </nav>
-        <div class="nav-actions">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <div class="profile-pic"></div>
+    <nav class="navbar">
+        <div class="nav-brand">CINEBY</div>
+        <div class="nav-links">
+            <a href="#" class="active">Home</a>
+            <a href="#">TV Shows</a>
+            <a href="#">Movies</a>
+            <a href="#">New & Popular</a>
+            <a href="#">My List</a>
         </div>
-    </header>
+        <div class="nav-icons">
+            <svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <div class="avatar"></div>
+        </div>
+    </nav>
 
     <!-- Hero Section -->
-    <section class="hero" id="hero">
-        <div class="hero-overlay"></div>
+    <div class="hero-section" id="hero-section">
         <div class="hero-content">
-            <h1 class="hero-title" id="hero-title">Loading...</h1>
-            <p class="hero-description">Watch the latest trending movies and TV shows from Cineby. Discover a world of entertainment with an immersive viewing experience.</p>
+            <h1 class="hero-title" id="hero-title">Memuat...</h1>
+            <p class="hero-description" id="hero-desc">Mohon tunggu, sedang mengambil data dari server...</p>
             <div class="hero-buttons">
-                <button class="btn btn-play">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play
-                </button>
-                <button class="btn btn-info">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> More Info
-                </button>
+                <button class="btn btn-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Play</button>
+                <button class="btn btn-more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> More Info</button>
             </div>
         </div>
-    </section>
+        <div class="hero-vignette"></div>
+    </div>
 
     <!-- Dynamic Categories Container -->
     <div id="categories-container">
         <!-- Skeleton Loaders -->
         <section class="slider-section">
-            <h2 class="slider-title" style="width: 200px; height: 30px; background: #333; margin-bottom: 15px; border-radius: 4px;"></h2>
-            <div class="slider-container skeleton-container">
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
+            <h2 class="slider-title" style="width: 200px; height: 30px; background: #333; margin-bottom: 20px; border-radius: 4px;"></h2>
+            <div class="slider-container" style="display: flex; gap: 10px;">
+                <div class="movie-card" style="background: #333;"></div>
+                <div class="movie-card" style="background: #333;"></div>
+                <div class="movie-card" style="background: #333;"></div>
+                <div class="movie-card" style="background: #333;"></div>
+                <div class="movie-card" style="background: #333;"></div>
             </div>
         </section>
     </div>
@@ -66,11 +62,11 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 Kembali
             </div>
-            <div id="server-selector" class="server-selector">
-                <!-- Tombol server akan dirender via JS -->
-            </div>
         </div>
-        <div id="iframe-container" style="width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; background: black;"></div>
+        <div id="video-container" style="width: 100%; flex: 1; display: flex; justify-content: center; align-items: center; background: black; position: relative;">
+            <div id="player-loading" style="position: absolute; color: white; display: none;">Menyambungkan ke Server Scraper...</div>
+            <video id="custom-player" controls style="width: 100%; height: 100%; background: #000; outline: none;"></video>
+        </div>
     </div>
 
     <script src="app.js"></script>

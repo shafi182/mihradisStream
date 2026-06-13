@@ -18,78 +18,67 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePlayer = document.getElementById('close-player');
     const iframeContainer = document.getElementById('iframe-container');
 
-    // Menutup player page
-    closePlayer.addEventListener('click', () => {
-        playerPage.classList.remove('active');
-        iframeContainer.innerHTML = ''; // Hentikan video
-        document.body.style.overflow = 'auto'; // Kembalikan scroll beranda
-    });
+    let hls = null;
 
-    let currentPlayerMediaType = '';
-    let currentPlayerId = '';
-
-    window.changeServer = function(btn, serverName, useSandbox = false) {
-        if (btn) {
-            document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-        
-        let iframeUrl = '';
-        const id = currentPlayerId;
-        
-        if (currentPlayerMediaType === 'tv') {
-            if (serverName === 'vidsrc.me') iframeUrl = `https://vidsrc.me/embed/tv?tmdb=${id}`;
-            else if (serverName === 'vidsrc.pro') iframeUrl = `https://vidsrc.pro/embed/tv/${id}`;
-            else if (serverName === 'vidsrc.cc') iframeUrl = `https://vidsrc.cc/v2/embed/tv/${id}`;
-            else if (serverName === 'superembed') iframeUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
-        } else {
-            if (serverName === 'vidlink') iframeUrl = `https://vidlink.pro/movie/${id}?primaryColor=e50914&autoplay=1`;
-            else if (serverName === 'embed.su') iframeUrl = `https://embed.su/embed/movie/${id}`;
-            else if (serverName === 'vidsrc.me') iframeUrl = `https://vidsrc.me/embed/movie?tmdb=${id}`;
-            else if (serverName === 'superembed') iframeUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
-        }
-        
-        const sandboxAttr = useSandbox ? 'sandbox="allow-same-origin allow-scripts allow-forms"' : '';
-        
-        iframeContainer.innerHTML = `
-            <iframe 
-                src="${iframeUrl}" 
-                allowfullscreen 
-                ${sandboxAttr}
-            ></iframe>
-        `;
-    };
-
-    function playVideo(mediaType, id) {
-        currentPlayerMediaType = mediaType;
-        currentPlayerId = id;
-        
-        const serverSelector = document.getElementById('server-selector');
-        
-        if (mediaType === 'tv') {
-            serverSelector.innerHTML = `
-                <button class="server-btn active" onclick="changeServer(this, 'vidsrc.me', false)">Server 1 (Lancar)</button>
-                <button class="server-btn" onclick="changeServer(this, 'vidsrc.cc', true)">Server 2 (Tanpa Iklan)</button>
-                <button class="server-btn" onclick="changeServer(this, 'superembed', true)">Server 3 (Tanpa Iklan)</button>
-                <button class="server-btn" onclick="changeServer(this, 'vidsrc.pro', false)">Server 4 (Alternatif)</button>
-            `;
-            changeServer(null, 'vidsrc.me', false);
-        } else {
-            serverSelector.innerHTML = `
-                <button class="server-btn active" onclick="changeServer(this, 'vidlink', false)">Server 1 (Lancar HD)</button>
-                <button class="server-btn" onclick="changeServer(this, 'embed.su', true)">Server 2 (Tanpa Iklan)</button>
-                <button class="server-btn" onclick="changeServer(this, 'superembed', true)">Server 3 (Tanpa Iklan)</button>
-                <button class="server-btn" onclick="changeServer(this, 'vidsrc.me', false)">Server 4 (Alternatif)</button>
-            `;
-            changeServer(null, 'vidlink', false);
-        }
-
+    async function playVideo(mediaType, id) {
         playerPage.classList.add('active');
         document.body.style.overflow = 'hidden'; 
         
-        const firstBtn = serverSelector.querySelector('.server-btn');
-        if (firstBtn) firstBtn.classList.add('active');
+        const videoElement = document.getElementById('custom-player');
+        const loadingElement = document.getElementById('player-loading');
+        
+        loadingElement.style.display = 'block';
+        videoElement.style.display = 'none';
+        
+        try {
+            // Karena ini untuk demonstrasi dan scraper berjalan lokal, arahkan ke localhost:3000
+            // Nanti kamu bisa menggantinya dengan IP Server VPS milikmu
+            const response = await fetch(`http://localhost:3000/api/get-stream/${mediaType}/${id}`);
+            const data = await response.json();
+
+            if (data.success && data.streamUrl) {
+                loadingElement.style.display = 'none';
+                videoElement.style.display = 'block';
+                
+                const videoSrc = data.streamUrl;
+
+                if (Hls.isSupported()) {
+                    if (hls) {
+                        hls.destroy();
+                    }
+                    hls = new Hls();
+                    hls.loadSource(videoSrc);
+                    hls.attachMedia(videoElement);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        videoElement.play();
+                    });
+                } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Fallback untuk browser Safari asli
+                    videoElement.src = videoSrc;
+                    videoElement.addEventListener('loadedmetadata', function() {
+                        videoElement.play();
+                    });
+                }
+            } else {
+                loadingElement.textContent = "Gagal memuat video dari server. Pastikan Backend Scraper berjalan.";
+            }
+        } catch (error) {
+            console.error("Error fetching stream:", error);
+            loadingElement.textContent = "Error: Tidak dapat terhubung ke Backend Scraper (localhost:3000).";
+        }
     }
+
+    document.getElementById('close-player').addEventListener('click', () => {
+        playerPage.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        const videoElement = document.getElementById('custom-player');
+        videoElement.pause();
+        videoElement.removeAttribute('src');
+        if (hls) {
+            hls.destroy();
+            hls = null;
+        }
+    });
 
     function optimizeImage(url) {
         if (!url) return '';
