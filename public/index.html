@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cineby - Watch Movies Online</title>
+    <meta name="description" content="Streaming platform with Netflix-like UI consuming Cineby Scraper API.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo">CINEBY</div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#" class="active">Home</a></li>
+                <li><a href="#">TV Shows</a></li>
+                <li><a href="#">Movies</a></li>
+                <li><a href="#">New & Popular</a></li>
+                <li><a href="#">My List</a></li>
+            </ul>
+        </nav>
+        <div class="nav-actions">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <div class="profile-pic"></div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title" id="hero-title">Loading...</h1>
+            <p class="hero-description">Watch the latest trending movies and TV shows from Cineby. Discover a world of entertainment with an immersive viewing experience.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-play">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Play
+                </button>
+                <button class="btn btn-info">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg> More Info
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Movie Row -->
+    <section class="slider-section">
+        <h2 class="slider-title">Trending Now</h2>
+        <div class="slider-container" id="trending-container">
+            <!-- Loading Skeleton -->
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>

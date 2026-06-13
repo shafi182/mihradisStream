@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  scraper-api:
+    build: .
+    container_name: cineby-scraper
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    environment:
+      # Ganti value di bawah dengan IP dan Port proxy luar negeri yang aktif.
+      # Format HTTP Proxy: http://ip:port atau http://username:password@ip:port
+      # Format SOCKS5 Proxy: socks5://ip:port
+      - PROXY_SERVER=http://8.213.151.128:3129
+    restart: unless-stopped
+    # Tambahkan kapabilitas keamanan jika Playwright/Chromium membutuhkannya
+    cap_add:
+      - SYS_ADMIN
