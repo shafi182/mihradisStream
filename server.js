@@ -57,50 +57,70 @@ app.get('/api/trending', async (req, res) => {
 
         const nextData = JSON.parse(nextDataScript);
         
-        let rawMovies = [];
+        let rawCategories = [];
         const pageProps = nextData.props?.pageProps;
         
-        // Cari di trendingSections atau defaultSections
+        // Kumpulkan semua kategori
         if (pageProps?.trendingSections) {
             pageProps.trendingSections.forEach(section => {
-                if (section.movies) rawMovies.push(...section.movies);
+                rawCategories.push({ name: section.name || "Trending", movies: section.movies || [] });
             });
         }
         if (pageProps?.defaultSections) {
             pageProps.defaultSections.forEach(section => {
-                if (section.movies) rawMovies.push(...section.movies);
+                rawCategories.push({ name: section.name || "More", movies: section.movies || [] });
             });
         }
-        if (pageProps?.initialGenreMovies) {
-             rawMovies.push(...pageProps.initialGenreMovies);
+        if (pageProps?.initialGenreMovies && pageProps.initialGenreMovies.length > 0) {
+            rawCategories.push({ name: "Recommended For You", movies: pageProps.initialGenreMovies });
         }
 
-        const movies = [];
+        let finalCategories = [];
         
-        rawMovies.forEach(m => {
-            if (m.title && m.slug && m.poster) {
-                // Hindari duplikasi
-                if (!movies.some(existing => existing.title === m.title)) {
-                    movies.push({
-                        title: m.title,
-                        link: `https://cineby.at${m.slug}`,
-                        poster: m.poster
-                    });
+        rawCategories.forEach(cat => {
+            let cleanedMovies = [];
+            cat.movies.forEach(m => {
+                if (m.title && m.slug && m.poster) {
+                    // Hindari duplikasi dalam 1 kategori
+                    if (!cleanedMovies.some(existing => existing.title === m.title)) {
+                        cleanedMovies.push({
+                            id: m.id,
+                            title: m.title.replace(/Top\d+/, '').split('·')[0].trim(),
+                            link: `https://cineby.at${m.slug}`,
+                            poster: m.poster,
+                            background: m.background || m.image || null,
+                            description: m.description || "",
+                            rating: m.rating || null,
+                            release_date: m.release_date || null
+                        });
+                    }
                 }
+            });
+
+            if (cleanedMovies.length > 0) {
+                // Perbaiki nama kategori agar lebih estetik
+                let catName = cat.name;
+                if (catName === 'popularMovies') catName = 'Popular Movies';
+                if (catName === 'popularShowTV') catName = 'Popular TV Shows';
+                if (catName === 'trending') catName = 'Trending Now';
+                
+                finalCategories.push({
+                    name: catName,
+                    movies: cleanedMovies
+                });
             }
         });
         
         const responseData = {
             success: true,
-            count: movies.length,
-            data: movies
+            categories: finalCategories
         };
 
-        // 2. Simpan ke Cache jika berhasil dapat film
-        if (movies.length > 0) {
+        // 2. Simpan ke Cache jika berhasil dapat data
+        if (finalCategories.length > 0) {
             cache.data = responseData;
             cache.lastFetch = Date.now();
-            console.log(`Berhasil menyimpan ${movies.length} film ke dalam CACHE.`);
+            console.log(`Berhasil menyimpan ${finalCategories.length} kategori ke dalam CACHE.`);
         }
         
         return res.json(responseData);

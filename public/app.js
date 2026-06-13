@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navbar = document.querySelector('.navbar');
-    const trendingContainer = document.getElementById('trending-container');
+    const categoriesContainer = document.getElementById('categories-container');
     const heroSection = document.getElementById('hero');
     const heroTitle = document.getElementById('hero-title');
+    const heroDesc = document.querySelector('.hero-description');
 
     // Transisi Navbar saat di-scroll
     window.addEventListener('scroll', () => {
@@ -13,14 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Mengambil data dari API
     async function fetchMovies() {
         try {
             const response = await fetch('/api/trending');
             const result = await response.json();
 
-            if (result.success && result.data.length > 0) {
-                renderMovies(result.data);
+            if (result.success && result.categories.length > 0) {
+                renderCategories(result.categories);
             } else {
                 showError("Tidak ada film ditemukan. Silakan cek koneksi atau proxy.");
             }
@@ -30,56 +30,110 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderMovies(movies) {
-        trendingContainer.innerHTML = ''; // Hapus skeleton
+    function renderCategories(categories) {
+        categoriesContainer.innerHTML = ''; 
 
-        // Setel Hero Background dengan film pertama yang memiliki gambar beresolusi tinggi (atau poster)
-        const validMovies = movies.filter(m => m.poster && m.title !== 'Cineby');
-        if (validMovies.length > 0) {
-            const heroMovie = validMovies[Math.floor(Math.random() * Math.min(5, validMovies.length))];
+        // Setel Hero Background dengan film pertama yang memiliki gambar background
+        // Cari semua film yang punya background
+        let allMoviesWithBg = [];
+        categories.forEach(cat => {
+            cat.movies.forEach(m => {
+                if (m.background) allMoviesWithBg.push(m);
+            });
+        });
+
+        if (allMoviesWithBg.length > 0) {
+            // Pilih acak dari top 10
+            const heroMovie = allMoviesWithBg[Math.floor(Math.random() * Math.min(10, allMoviesWithBg.length))];
             
-            // Coba membersihkan judul dari tag tambahan jika ada
-            let cleanTitle = heroMovie.title.replace(/Top\d+/, '').split('·')[0].trim();
-            heroTitle.textContent = cleanTitle;
+            heroTitle.textContent = heroMovie.title;
+            if (heroMovie.description) {
+                heroDesc.textContent = heroMovie.description.substring(0, 150) + "...";
+            }
             
-            // Pasang gambar latar. Karena kita hanya punya poster, kita gunakan itu. 
-            // Di produksi nyata, kita butuh 'backdrop' horizontal.
-            heroSection.style.backgroundImage = `url('${heroMovie.poster}')`;
+            heroSection.style.backgroundImage = `url('${heroMovie.background}')`;
         }
 
-        // Render Kartu Film
-        validMovies.forEach(movie => {
-            const card = document.createElement('div');
-            card.className = 'movie-card';
+        // Render Setiap Kategori
+        categories.forEach(category => {
+            if (category.movies.length === 0) return;
+
+            const section = document.createElement('section');
+            section.className = 'slider-section';
             
-            // Tangani klik untuk membuka link Cineby (opsional)
-            card.addEventListener('click', () => {
-                window.open(movie.link, '_blank');
+            const title = document.createElement('h2');
+            title.className = 'slider-title';
+            title.textContent = category.name;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'slider-wrapper';
+
+            const leftArrow = document.createElement('div');
+            leftArrow.className = 'slider-arrow left';
+            leftArrow.innerHTML = '&#10094;';
+
+            const rightArrow = document.createElement('div');
+            rightArrow.className = 'slider-arrow right';
+            rightArrow.innerHTML = '&#10095;';
+
+            const container = document.createElement('div');
+            container.className = 'slider-container';
+
+            // Fitur geser
+            leftArrow.addEventListener('click', () => {
+                container.scrollBy({ left: -window.innerWidth * 0.7, behavior: 'smooth' });
+            });
+            rightArrow.addEventListener('click', () => {
+                container.scrollBy({ left: window.innerWidth * 0.7, behavior: 'smooth' });
             });
 
-            // Bersihkan teks judul untuk UI
-            let cleanTitle = movie.title.replace(/Top\d+/, '').split('·')[0].trim();
+            // Render Kartu Film
+            category.movies.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                
+                card.addEventListener('click', () => {
+                    window.open(movie.link, '_blank');
+                });
 
-            card.innerHTML = `
-                <img src="${movie.poster}" alt="${cleanTitle}" loading="lazy">
-                <div class="card-info">
-                    <div class="card-title">${cleanTitle}</div>
-                    <div class="card-actions">
-                        <div class="play-circle">
-                            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                let yearHTML = movie.release_date ? `<span class="year">${movie.release_date.substring(0,4)}</span>` : '';
+                let ratingHTML = movie.rating ? `<span>⭐ ${movie.rating}</span>` : '';
+
+                card.innerHTML = `
+                    <div class="card-image-wrapper">
+                        <img src="${movie.poster}" loading="lazy" alt="${movie.title}">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">${movie.title}</div>
+                        <div class="card-metadata">
+                            ${ratingHTML}
+                            ${yearHTML}
+                        </div>
+                        <div class="card-actions">
+                            <div class="play-circle">
+                                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-            trendingContainer.appendChild(card);
+                `;
+                container.appendChild(card);
+            });
+
+            wrapper.appendChild(leftArrow);
+            wrapper.appendChild(container);
+            wrapper.appendChild(rightArrow);
+            
+            section.appendChild(title);
+            section.appendChild(wrapper);
+
+            categoriesContainer.appendChild(section);
         });
     }
 
     function showError(message) {
-        trendingContainer.innerHTML = `<div style="color: white; padding: 20px;">${message}</div>`;
+        categoriesContainer.innerHTML = `<div style="color: white; padding: 20px;">${message}</div>`;
         heroTitle.textContent = "Oops!";
     }
 
-    // Mulai penarikan data
     fetchMovies();
 });

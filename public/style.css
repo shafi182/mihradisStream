@@ -204,13 +204,49 @@ body {
     gap: 10px;
     overflow-x: auto;
     overflow-y: visible;
-    padding: 20px 0 40px 0;
+    padding: 20px 4% 40px 4%;
     scroll-behavior: smooth;
+    position: relative;
 }
 
 .slider-container::-webkit-scrollbar {
     display: none;
 }
+
+/* Arrow Buttons */
+.slider-wrapper {
+    position: relative;
+    margin-top: -10px;
+}
+
+.slider-arrow {
+    position: absolute;
+    top: 0;
+    bottom: 40px; /* offset bottom padding */
+    width: 4%;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+.slider-wrapper:hover .slider-arrow {
+    opacity: 1;
+}
+
+.slider-arrow:hover {
+    background: rgba(0,0,0,0.8);
+    font-size: 2.5rem;
+}
+
+.slider-arrow.left { left: 0; }
+.slider-arrow.right { right: 0; }
 
 .movie-card {
     min-width: 250px;
@@ -218,10 +254,15 @@ body {
     border-radius: 4px;
     background-color: #222;
     cursor: pointer;
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                box-shadow 0.3s ease, 
-                z-index 0s;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
     position: relative;
+    overflow: visible; /* Penting untuk hover card yang melebar keluar */
+}
+
+.card-image-wrapper {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
     overflow: hidden;
 }
 
@@ -234,39 +275,53 @@ body {
 }
 
 .movie-card:hover {
-    transform: scale(1.35) translateY(-15%);
+    transform: scale(1.4) translateY(-15%);
     box-shadow: 0 10px 20px rgba(0,0,0,0.8);
-    z-index: 10;
-}
-
-.movie-card:hover img {
-    opacity: 0.5;
+    z-index: 20;
 }
 
 .card-info {
     position: absolute;
-    bottom: 0;
+    bottom: -60px;
     left: 0;
     width: 100%;
     padding: 10px;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    background: #141414;
+    border-radius: 0 0 4px 4px;
     opacity: 0;
     transition: opacity 0.3s;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+    pointer-events: none;
 }
 
 .movie-card:hover .card-info {
     opacity: 1;
+    pointer-events: auto;
 }
 
 .card-title {
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.card-metadata {
+    font-size: 9px;
+    color: #46d369;
+    font-weight: 600;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.card-metadata span.year {
+    color: #bcbcbc;
 }
 
 .card-actions {
