@@ -28,9 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPlayerMediaType = '';
     let currentPlayerId = '';
 
-    window.changeServer = function(btn, serverName) {
-        document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
+    window.changeServer = function(btn, serverName, useSandbox = false) {
+        if (btn) {
+            document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
         
         let iframeUrl = '';
         const id = currentPlayerId;
@@ -42,15 +44,18 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (serverName === 'superembed') iframeUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
         } else {
             if (serverName === 'vidlink') iframeUrl = `https://vidlink.pro/movie/${id}?primaryColor=e50914&autoplay=1`;
+            else if (serverName === 'embed.su') iframeUrl = `https://embed.su/embed/movie/${id}`;
             else if (serverName === 'vidsrc.me') iframeUrl = `https://vidsrc.me/embed/movie?tmdb=${id}`;
-            else if (serverName === 'vidsrc.pro') iframeUrl = `https://vidsrc.pro/embed/movie/${id}`;
             else if (serverName === 'superembed') iframeUrl = `https://multiembed.mov/directstream.php?video_id=${id}&tmdb=1`;
         }
+        
+        const sandboxAttr = useSandbox ? 'sandbox="allow-same-origin allow-scripts allow-forms"' : '';
         
         iframeContainer.innerHTML = `
             <iframe 
                 src="${iframeUrl}" 
                 allowfullscreen 
+                ${sandboxAttr}
             ></iframe>
         `;
     };
@@ -63,43 +68,37 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (mediaType === 'tv') {
             serverSelector.innerHTML = `
-                <button class="server-btn active" onclick="changeServer(this, 'vidsrc.me')">Server 1 (VidSrc)</button>
-                <button class="server-btn" onclick="changeServer(this, 'vidsrc.pro')">Server 2 (Pro)</button>
-                <button class="server-btn" onclick="changeServer(this, 'vidsrc.cc')">Server 3 (CC)</button>
-                <button class="server-btn" onclick="changeServer(this, 'superembed')">Server 4 (Super)</button>
+                <button class="server-btn active" onclick="changeServer(this, 'vidsrc.me', false)">Server 1 (Lancar)</button>
+                <button class="server-btn" onclick="changeServer(this, 'vidsrc.cc', true)">Server 2 (Tanpa Iklan)</button>
+                <button class="server-btn" onclick="changeServer(this, 'superembed', true)">Server 3 (Tanpa Iklan)</button>
+                <button class="server-btn" onclick="changeServer(this, 'vidsrc.pro', false)">Server 4 (Alternatif)</button>
             `;
-            changeServer(null, 'vidsrc.me');
+            changeServer(null, 'vidsrc.me', false);
         } else {
             serverSelector.innerHTML = `
-                <button class="server-btn active" onclick="changeServer(this, 'vidlink')">Server 1 (VidLink HD)</button>
-                <button class="server-btn" onclick="changeServer(this, 'vidsrc.me')">Server 2 (VidSrc)</button>
-                <button class="server-btn" onclick="changeServer(this, 'vidsrc.pro')">Server 3 (Pro)</button>
-                <button class="server-btn" onclick="changeServer(this, 'superembed')">Server 4 (Super)</button>
+                <button class="server-btn active" onclick="changeServer(this, 'vidlink', false)">Server 1 (Lancar HD)</button>
+                <button class="server-btn" onclick="changeServer(this, 'embed.su', true)">Server 2 (Tanpa Iklan)</button>
+                <button class="server-btn" onclick="changeServer(this, 'superembed', true)">Server 3 (Tanpa Iklan)</button>
+                <button class="server-btn" onclick="changeServer(this, 'vidsrc.me', false)">Server 4 (Alternatif)</button>
             `;
-            changeServer(null, 'vidlink');
+            changeServer(null, 'vidlink', false);
         }
 
         playerPage.classList.add('active');
         document.body.style.overflow = 'hidden'; 
         
-        // Tandai tombol pertama sebagai aktif
         const firstBtn = serverSelector.querySelector('.server-btn');
         if (firstBtn) firstBtn.classList.add('active');
     }
 
     function optimizeImage(url) {
         if (!url) return '';
-        // Kita kembali menggunakan Proxy bawaan Cineby agar tidak ada gambar rusak (404/Blank).
-        // Cukup turunkan lebar resolusinya ke w=384 (ukuran standar Next.js) agar loading super cepat!
         if (url.includes('/_next/image?url=')) {
             return url.replace(/w=\d+/, 'w=384').replace(/q=\d+/, 'q=60');
         }
-        
-        // Jika url asli adalah TMDB, gunakan server TMDB langsung dengan resolusi w500
         if (url.includes('image.tmdb.org') || url.includes('tmdb.org')) {
             return url.replace('/original/', '/w500/');
         }
-
         return url;
     }
 
@@ -170,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.className = 'slider-container';
 
             let currentTranslate = 0;
-            const cardWidth = 170; // 160px (kartu vertikal) + 10px gap
+            const cardWidth = 170; 
 
             leftArrow.addEventListener('click', () => {
                 currentTranslate += cardWidth * 4;
@@ -179,7 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             rightArrow.addEventListener('click', () => {
-                const maxTranslate = -((category.movies.length - 2) * cardWidth);
+                // BUG FIX: Gunakan scrollWidth asli container dikurangi lebar area yang terlihat
+                // agar slider tidak melewati batas akhir dan menyebabkan ruang kosong hitam.
+                const maxTranslate = -(container.scrollWidth - container.clientWidth);
                 currentTranslate -= cardWidth * 4;
                 if (currentTranslate < maxTranslate) currentTranslate = maxTranslate;
                 container.style.transform = `translateX(${currentTranslate}px)`;
