@@ -46,15 +46,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function optimizeImage(url) {
         if (!url) return '';
-        // Jika URL menggunakan server TMDB dengan resolusi "original", kompres menjadi w500 (500px)
-        if (url.includes('image.tmdb.org') && url.includes('/original/')) {
-            return url.replace('/original/', '/w500/');
+        let finalUrl = url;
+
+        // Jika URL adalah proxy Next.js Cineby, ekstrak URL aslinya agar tidak membebani server mereka
+        if (finalUrl.includes('/_next/image?url=')) {
+            try {
+                // Buat objek URL dummy untuk mengekstrak parameter
+                const urlObj = new URL(finalUrl, 'https://cineby.at');
+                const innerUrl = urlObj.searchParams.get('url');
+                if (innerUrl) {
+                    finalUrl = innerUrl;
+                }
+            } catch(e) {
+                console.error("URL Parsing error", e);
+            }
         }
-        // Jika menggunakan parameter lebar _next/image, turunkan ke w=640
-        if (url.includes('w=') && url.includes('q=')) {
-            return url.replace(/w=\d+/, 'w=640').replace(/q=\d+/, 'q=60');
+
+        // Jika url asli adalah TMDB, gunakan server TMDB langsung dengan resolusi w500
+        if (finalUrl.includes('image.tmdb.org') || finalUrl.includes('tmdb.org')) {
+            return finalUrl.replace('/original/', '/w500/');
         }
-        return url;
+
+        // Kembalikan URL yang sudah dikompresi
+        return finalUrl;
     }
 
     async function fetchMovies() {
