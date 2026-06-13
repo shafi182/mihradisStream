@@ -28,11 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function playVideo(mediaType, id) {
         let iframeUrl = '';
         if (mediaType === 'tv') {
-            // Vidlink butuh parameter season & episode untuk TV Show.
-            // Karena kita tidak punya data itu, kita pakai vidsrc.net yang punya UI pemilih episode bawaan!
-            iframeUrl = `https://vidsrc.net/embed/tv?tmdb=${id}`;
+            // Ganti vidsrc.net ke vidsrc.me atau vidsrc.cc karena .net sepertinya mati/diblokir DNS
+            iframeUrl = `https://vidsrc.me/embed/tv?tmdb=${id}`;
         } else {
-            // Untuk Film (Movie), vidlink.pro jauh lebih bersih.
             iframeUrl = `https://vidlink.pro/movie/${id}?primaryColor=e50914&autoplay=1`;
         }
         
@@ -43,7 +41,20 @@ document.addEventListener('DOMContentLoaded', () => {
             ></iframe>
         `;
         playerPage.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Kunci scroll beranda
+        document.body.style.overflow = 'hidden'; 
+    }
+
+    function optimizeImage(url) {
+        if (!url) return '';
+        // Jika URL menggunakan server TMDB dengan resolusi "original", kompres menjadi w500 (500px)
+        if (url.includes('image.tmdb.org') && url.includes('/original/')) {
+            return url.replace('/original/', '/w500/');
+        }
+        // Jika menggunakan parameter lebar _next/image, turunkan ke w=640
+        if (url.includes('w=') && url.includes('q=')) {
+            return url.replace(/w=\d+/, 'w=640').replace(/q=\d+/, 'q=60');
+        }
+        return url;
     }
 
     async function fetchMovies() {
@@ -80,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 heroDesc.textContent = heroMovie.description.substring(0, 150) + "...";
             }
             
+            // Hero section tetap butuh resolusi tinggi (tidak dikompres ekstrim)
             heroSection.style.backgroundImage = `url('${heroMovie.background}')`;
 
             const heroPlayBtn = document.querySelector('.btn-play');
@@ -112,9 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.createElement('div');
             container.className = 'slider-container';
 
-            // Logika Geser Javascript (Transform TranslateX)
             let currentTranslate = 0;
-            const cardWidth = 260; // 250px + 10px gap
+            const cardWidth = 260; 
 
             leftArrow.addEventListener('click', () => {
                 currentTranslate += cardWidth * 3;
@@ -140,8 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let yearHTML = movie.release_date ? `<span class="year">${movie.release_date.substring(0,4)}</span>` : '';
                 let ratingHTML = movie.rating ? `<span>⭐ ${movie.rating}</span>` : '';
                 
-                // Gunakan background (16:9) jika ada, jika tidak, gunakan poster
-                const thumbnail = movie.background || movie.poster;
+                // Gunakan fungsi kompresi gambar agar loading super cepat
+                const rawThumbnail = movie.background || movie.poster;
+                const thumbnail = optimizeImage(rawThumbnail);
 
                 card.innerHTML = `
                     <div class="card-image-wrapper">
