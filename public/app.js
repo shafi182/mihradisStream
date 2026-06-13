@@ -46,29 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function optimizeImage(url) {
         if (!url) return '';
-        let finalUrl = url;
-
-        // Jika URL adalah proxy Next.js Cineby, ekstrak URL aslinya agar tidak membebani server mereka
-        if (finalUrl.includes('/_next/image?url=')) {
-            try {
-                // Buat objek URL dummy untuk mengekstrak parameter
-                const urlObj = new URL(finalUrl, 'https://cineby.at');
-                const innerUrl = urlObj.searchParams.get('url');
-                if (innerUrl) {
-                    finalUrl = innerUrl;
-                }
-            } catch(e) {
-                console.error("URL Parsing error", e);
-            }
+        // Kita kembali menggunakan Proxy bawaan Cineby agar tidak ada gambar rusak (404/Blank).
+        // Cukup turunkan lebar resolusinya ke w=384 (ukuran standar Next.js) agar loading super cepat!
+        if (url.includes('/_next/image?url=')) {
+            return url.replace(/w=\d+/, 'w=384').replace(/q=\d+/, 'q=60');
         }
-
+        
         // Jika url asli adalah TMDB, gunakan server TMDB langsung dengan resolusi w500
-        if (finalUrl.includes('image.tmdb.org') || finalUrl.includes('tmdb.org')) {
-            return finalUrl.replace('/original/', '/w500/');
+        if (url.includes('image.tmdb.org') || url.includes('tmdb.org')) {
+            return url.replace('/original/', '/w500/');
         }
 
-        // Kembalikan URL yang sudah dikompresi
-        return finalUrl;
+        return url;
     }
 
     async function fetchMovies() {
@@ -105,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 heroDesc.textContent = heroMovie.description.substring(0, 150) + "...";
             }
             
-            // Hero section tetap butuh resolusi tinggi (tidak dikompres ekstrim)
             heroSection.style.backgroundImage = `url('${heroMovie.background}')`;
 
             const heroPlayBtn = document.querySelector('.btn-play');
@@ -139,17 +127,17 @@ document.addEventListener('DOMContentLoaded', () => {
             container.className = 'slider-container';
 
             let currentTranslate = 0;
-            const cardWidth = 260; 
+            const cardWidth = 170; // 160px (kartu vertikal) + 10px gap
 
             leftArrow.addEventListener('click', () => {
-                currentTranslate += cardWidth * 3;
+                currentTranslate += cardWidth * 4;
                 if (currentTranslate > 0) currentTranslate = 0;
                 container.style.transform = `translateX(${currentTranslate}px)`;
             });
 
             rightArrow.addEventListener('click', () => {
                 const maxTranslate = -((category.movies.length - 2) * cardWidth);
-                currentTranslate -= cardWidth * 3;
+                currentTranslate -= cardWidth * 4;
                 if (currentTranslate < maxTranslate) currentTranslate = maxTranslate;
                 container.style.transform = `translateX(${currentTranslate}px)`;
             });
@@ -165,8 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 let yearHTML = movie.release_date ? `<span class="year">${movie.release_date.substring(0,4)}</span>` : '';
                 let ratingHTML = movie.rating ? `<span>⭐ ${movie.rating}</span>` : '';
                 
-                // Gunakan fungsi kompresi gambar agar loading super cepat
-                const rawThumbnail = movie.background || movie.poster;
+                // Gunakan Poster vertikal (bukan background) agar judul film terbaca jelas di gambar!
+                const rawThumbnail = movie.poster;
                 const thumbnail = optimizeImage(rawThumbnail);
 
                 card.innerHTML = `
