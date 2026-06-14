@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navbar = document.querySelector('.navbar');
     const categoriesContainer = document.getElementById('categories-container');
-    const heroSection = document.getElementById('hero');
+    const heroSection = document.getElementById('hero-section');
     const heroTitle = document.getElementById('hero-title');
     const heroDesc = document.querySelector('.hero-description');
 
