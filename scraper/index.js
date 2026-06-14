@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 
 // Konstanta Konfigurasi
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3005;
 
 // Endpoint Ekstraksi Stream
 app.get('/api/get-stream/:type/:id', async (req, res) => {

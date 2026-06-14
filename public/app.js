@@ -31,9 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
         videoElement.style.display = 'none';
         
         try {
-            // Karena ini untuk demonstrasi dan scraper berjalan lokal, arahkan ke localhost:3000
+            // Karena ini untuk demonstrasi dan scraper berjalan lokal, arahkan ke localhost:3005
             // Nanti kamu bisa menggantinya dengan IP Server VPS milikmu
-            const response = await fetch(`http://localhost:3000/api/get-stream/${mediaType}/${id}`);
+            const response = await fetch(`http://localhost:3005/api/get-stream/${mediaType}/${id}`);
             const data = await response.json();
 
             if (data.success && data.streamUrl) {
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("Error fetching stream:", error);
-            loadingElement.textContent = "Error: Tidak dapat terhubung ke Backend Scraper (localhost:3000).";
+            loadingElement.textContent = "Error: Tidak dapat terhubung ke Backend Scraper (localhost:3005).";
         }
     }
 
